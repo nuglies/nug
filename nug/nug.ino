@@ -50,11 +50,13 @@ void setup() {
   pinMode(LED_BUILTIN, OUTPUT);     // Initialize the LED_BUILTIN pin as an output
 
   WiFiMulti.addAP("the shire", "parker7275dahlia");
-  while(!(WiFiMulti.run() == WL_CONNECTED)) {
+  while (!(WiFiMulti.run() == WL_CONNECTED)) {
     Serial.println("Waiting for WIFI to connect\n\r");
     delay(1000);
   }
 }
+
+int loopCount = 0;
 
 void loop() {
   String postData;
@@ -98,16 +100,16 @@ void loop() {
   Serial.println(" *F");
 
   // Print out readings, change HEX to DEC if you prefer decimal output
-  Serial.print("Red: "); Serial.println(red,DEC);
-  Serial.print("Green: "); Serial.println(green,DEC);
-  Serial.print("Blue: "); Serial.println(blue,DEC);
+  Serial.print("Red: "); Serial.println(red, DEC);
+  Serial.print("Green: "); Serial.println(green, DEC);
+  Serial.print("Blue: "); Serial.println(blue, DEC);
   Serial.println();
 
 
   // configure traged server and url
   //http.begin("https://192.168.1.12:8000/test.html", "7a 9c f4 db 40 d3 62 5a 6e 21 bc 5c cc 66 c8 3e a1 45 59 38"); //HTTPS
   http.begin("http://cjparker.us/nug/api/rawData");
-  http.addHeader("Content-Type","application/json");
+  http.addHeader("Content-Type", "application/json");
 
   postData = "{\"tempF\" : ";
   postData.concat(f);
@@ -129,23 +131,26 @@ void loop() {
   int httpCode = http.POST(postData);
 
   // httpCode will be negative on error
-  if(httpCode > 0) {
-      // HTTP header has been send and Server response header has been handled
-      Serial.printf("[HTTP] POST... code: %d\n", httpCode);
+  if (httpCode > 0) {
+    // HTTP header has been send and Server response header has been handled
+    Serial.printf("[HTTP] POST... code: %d\n", httpCode);
 
-      // file found at server
-      if(httpCode == HTTP_CODE_OK) {
-          String payload = http.getString();
-          Serial.println(payload);
-      }
+    // file found at server
+    if (httpCode == HTTP_CODE_OK) {
+      String payload = http.getString();
+      Serial.println(payload);
+    }
   } else {
     Serial.printf("[HTTP] POST... failed, error: %s\n", http.errorToString(httpCode).c_str());
   }
-    http.end();
-  }
+  http.end();
 
-  digitalWrite(LED_BUILTIN, LOW);
-  delay(1000);
+
   digitalWrite(LED_BUILTIN, HIGH);
   delay(1000);
+  digitalWrite(LED_BUILTIN, LOW);
+  delay(1000);
+
+  Serial.printf("waiting 5 minutes");
+  delay(1000 * 60 * 5);
 }
