@@ -18,7 +18,7 @@ function NugServer() {
 
   let handleNugDataGET = (req, res) => {
 
-    rawDataCollection.find()
+    rawDataCollection.find().sort({dateTime:-1})
       .then(result => {
         res.json(result)
       })
