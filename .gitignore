@@ -8,3 +8,4 @@ server.log
 .password
 app/styles/*.css.map
 .wuAPIKey
+.DS_Store

@@ -15,6 +15,7 @@ SFE_ISL29125 RGB_sensor;
 
 #define DHTPIN 0     // what digital pin we're connected to
 
+
 // Uncomment whatever type you're using!
 //#define DHTTYPE DHT11   // DHT 11
 #define DHTTYPE DHT22   // DHT 22  (AM2302), AM2321
@@ -31,6 +32,10 @@ SFE_ISL29125 RGB_sensor;
 // Note that older versions of this library took an optional third parameter to
 // tweak the timings for faster processors.  This parameter is no longer needed
 // as the current DHT reading algorithm adjusts itself to work on faster procs.
+
+const int LED_PIN = 14;
+const int sleepSeconds = 300;
+
 DHT dht(DHTPIN, DHTTYPE);
 
 HTTPClient http;
@@ -39,6 +44,8 @@ void setup() {
   Serial.begin(9600);
   Serial.println("Nug!");
 
+  pinMode(LED_PIN, OUTPUT);     // Initialize the LED_PIN pin as an output
+  digitalWrite(LED_PIN, HIGH);
 
   if (RGB_sensor.init()) {
     Serial.println("Sensor Initialization Successful\n\r");
@@ -46,19 +53,17 @@ void setup() {
 
   dht.begin();
 
-  // blink built-in led so we know its working
-  pinMode(LED_BUILTIN, OUTPUT);     // Initialize the LED_BUILTIN pin as an output
+
 
   WiFiMulti.addAP("the shire", "parker7275dahlia");
   while (!(WiFiMulti.run() == WL_CONNECTED)) {
+    digitalWrite(LED_PIN, HIGH);
     Serial.println("Waiting for WIFI to connect\n\r");
-    delay(1000);
+    digitalWrite(LED_PIN, LOW);
+    delay(200);
   }
-}
+  digitalWrite(LED_PIN, HIGH);
 
-int loopCount = 0;
-
-void loop() {
   String postData;
   // Wait a few seconds between measurements.
 
@@ -73,7 +78,6 @@ void loop() {
   // Check if any reads failed and exit early (to try again).
   if (isnan(h) || isnan(t) || isnan(f)) {
     Serial.println("Failed to read from DHT sensor!");
-    return;
   }
 
   unsigned int red = RGB_sensor.readRed();
@@ -144,13 +148,12 @@ void loop() {
     Serial.printf("[HTTP] POST... failed, error: %s\n", http.errorToString(httpCode).c_str());
   }
   http.end();
+  Serial.printf("sleeping");
+  digitalWrite(LED_PIN, LOW);
+  ESP.deepSleep(sleepSeconds * 1000000);
+}
 
+int loopCount = 0;
 
-  digitalWrite(LED_BUILTIN, HIGH);
-  delay(1000);
-  digitalWrite(LED_BUILTIN, LOW);
-  delay(1000);
-
-  Serial.printf("waiting 5 minutes");
-  delay(1000 * 60 * 5);
+void loop() {
 }
